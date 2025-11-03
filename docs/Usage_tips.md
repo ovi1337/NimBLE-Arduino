@@ -40,6 +40,48 @@ CCCDs values results in those bonds being lost.
 Fix: Increase CONFIG_BT_NIMBLE_MAX_CCCDS. These take approximately 40 bytes in NVS, 2 bytes for the CCCD value and the NVS metadata overhead. The value of
 CONFIG_BT_NIMBLE_MAX_CCCDS should conservatively be no less than (CONFIG_BT_NIMBLE_MAX_BONDS * {maximum number of characteristics that can be subscribed to}).
 
+## Adjust the default of MAX_CONNECTIONS >3
+If you are trying to adjust the maximum amount of devices and you are getting an error like this:
+```bash
+...
+06:17:09.807 > assertion:callout
+06:17:09.812 > line:651,function:npl_freertos_callout_init
+06:17:09.812 > 
+06:17:09.856 > assert failed: npl_freertos_callout_init npl_os_freertos.c:651 (0)
+...
+```
+Can you solve it by using the hybrid framework mode of [pioarduino version of platform-espressif32](https://github.com/pioarduino/platform-espressif32).
+Use the following additional configuration in your **platformio.ini** to adjust the maximum amount of connections (in this example is it configured for 9 simultaneous devices):
+
+```ini
+custom_sdkconfig =
+    '# CONFIG_BT_NIMBLE_ROLE_CENTRAL_ENABLED is no set'
+    '# CONFIG_BT_NIMBLE_ROLE_PERIPHERAL_ENABLED is not set'
+    CONFIG_NIMBLE_CPP_LOG_LEVEL=0
+    CONFIG_BT_NIMBLE_MAX_CONNECTIONS=9
+    CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE=8192
+    CONFIG_BT_NIMBLE_MAX_BONDS=9
+    CONFIG_BT_NIMBLE_MAX_CCCDS=9
+
+custom_component_remove = espressif/esp_hosted
+                          espressif/esp_wifi_remote
+                          espressif/network_provisioning
+                          espressif/mdns
+                          espressif/esp-dsp
+                          espressif/esp_modem
+                          espressif/esp32-camera
+                          espressif/libsodium
+                          espressif/esp-modbus
+                          espressif/qrcode
+                          espressif/esp_insights
+                          espressif/esp_diag_data_store
+                          espressif/esp_diagnostics
+                          espressif/cbor
+                          espressif/esp_rainmaker
+                          espressif/rmaker_common
+                          chmorgan/esp-libhelix-mp3
+```
+
 ## Device 'Local Name'
 
 'Local name' refers to how the device is seen and displayed.
